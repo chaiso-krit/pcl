@@ -35,12 +35,12 @@
  *
  */
 
-#include <pcl_cuda/time_cpu.h>
-#include <pcl_cuda/time_gpu.h>
-#include <pcl_cuda/io/cloud_to_pcl.h>
-#include <pcl_cuda/io/extract_indices.h>
-#include <pcl_cuda/io/disparity_to_cloud.h>
-#include <pcl_cuda/io/host_device.h>
+#include <pcl/cuda/time_cpu.h>
+#include <pcl/cuda/time_gpu.h>
+#include <pcl/cuda/io/cloud_to_pcl.h>
+#include <pcl/cuda/io/extract_indices.h>
+#include <pcl/cuda/io/disparity_to_cloud.h>
+#include <pcl/cuda/io/host_device.h>
 
 #include <pcl/io/openni_grabber.h>
 #include <pcl/io/pcd_grabber.h>
@@ -49,10 +49,10 @@
 #include <boost/shared_ptr.hpp>
 #include <pcl/visualization/cloud_viewer.h>
 #include <iostream>
-#include <pcl_cuda/sample_consensus/sac_model_1point_plane.h>
-#include <pcl_cuda/sample_consensus/ransac.h>
+#include <pcl/cuda/sample_consensus/sac_model_1point_plane.h>
+#include <pcl/cuda/sample_consensus/ransac.h>
 
-using namespace pcl_cuda;
+using namespace pcl::cuda;
 
 class SimpleKinectTool
 {
@@ -62,7 +62,7 @@ class SimpleKinectTool
     template <template <typename> class Storage> void 
     file_cloud_cb (const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& cloud) 
     {
-      pcl::ScopeTime ttt ("all");
+      ScopeTimeCPU ttt ("all");
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr output (new pcl::PointCloud<pcl::PointXYZRGB>);
       PointCloudAOS<Host> data_host;
       data_host.points.resize (cloud->points.size());
@@ -87,7 +87,7 @@ class SimpleKinectTool
       sac.setDistanceThreshold (0.05);
 
       {
-        pcl::ScopeTime timer ("computeModel: ");
+        ScopeTimeCPU timer ("computeModel: ");
         if (!sac.computeModel (0))
         {
           std::cerr << "Failed to compute model" << std::endl;
@@ -119,7 +119,7 @@ class SimpleKinectTool
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr output (new pcl::PointCloud<pcl::PointXYZRGB>);
       typename PointCloudAOS<Storage>::Ptr data;
       {
-      pcl::ScopeTime timer ("All: ");
+      ScopeTimeCPU timer ("All: ");
       // Compute the PointCloud on the device
       d2c.compute<Storage> (depth_image, image, constant, data);
 
@@ -129,7 +129,7 @@ class SimpleKinectTool
       sac.setDistanceThreshold (0.05);
 
       {
-        pcl::ScopeTime timer ("computeModel: ");
+        ScopeTimeCPU timer ("computeModel: ");
         if (!sac.computeModel (0))
         {
           std::cerr << "Failed to compute model" << std::endl;
@@ -146,7 +146,7 @@ class SimpleKinectTool
       }
 
     }
-      pcl_cuda::toPCL (*data, *output);
+      toPCL (*data, *output);
       //viewer.showCloud (output);
     }
     
@@ -165,14 +165,14 @@ class SimpleKinectTool
       if (use_device)
       {
         std::cerr << "[RANSAC] Using GPU..." << std::endl;
-        boost::function<void (const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr&)> f = boost::bind (&SimpleKinectTool::file_cloud_cb<pcl_cuda::Device>, this, _1);
+        boost::function<void (const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr&)> f = boost::bind (&SimpleKinectTool::file_cloud_cb<Device>, this, _1);
         filegrabber->registerCallback (f);
       }
       else
       {
-        std::cerr << "[RANSAC] Using CPU..." << std::endl;
-        boost::function<void (const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr&)> f = boost::bind (&SimpleKinectTool::file_cloud_cb<pcl_cuda::Host>, this, _1);
-        filegrabber->registerCallback (f);
+        //std::cerr << "[RANSAC] Using CPU..." << std::endl;
+        //boost::function<void (const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr&)> f = boost::bind (&SimpleKinectTool::file_cloud_cb<pcl_cuda::Host>, this, _1);
+        //filegrabber->registerCallback (f);
       }
 
       filegrabber->start ();
@@ -214,7 +214,7 @@ class SimpleKinectTool
 #endif 
     }
 
-    pcl_cuda::DisparityToCloud d2c;
+    DisparityToCloud d2c;
     //pcl::visualization::CloudViewer viewer;
     boost::mutex mutex_;
     bool go_on;

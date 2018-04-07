@@ -24,6 +24,13 @@ if(build)
     PCL_CUDA_ADD_EXECUTABLE(kinect_viewer_cuda "${SUBSYS_NAME}" src/kinect_viewer_cuda.cpp)
     target_link_libraries (kinect_viewer_cuda pcl_io pcl_cuda_io pcl_visualization pcl_common pcl_kdtree)
 
+    PCL_CUDA_ADD_EXECUTABLE(kinect_ransac "${SUBSYS_NAME}" src/kinect_ransac.cpp)
+    target_link_libraries (kinect_ransac pcl_io pcl_cuda_io pcl_visualization pcl_common pcl_kdtree pcl_cuda_segmentation pcl_cuda_sample_consensus)
+
+    find_package(OpenCV REQUIRED)
+    PCL_CUDA_ADD_EXECUTABLE(kinect_segmentation_cuda "${SUBSYS_NAME}" src/kinect_segmentation_cuda.cpp)
+    target_link_libraries (kinect_segmentation_cuda pcl_io pcl_cuda_io pcl_visualization pcl_common pcl_kdtree pcl_cuda_features pcl_cuda_segmentation pcl_cuda_sample_consensus ${OpenCV_LIBS})
+
   endif()
 endif(build)
 
