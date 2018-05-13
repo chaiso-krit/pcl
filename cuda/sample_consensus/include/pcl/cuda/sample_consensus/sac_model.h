@@ -81,6 +81,12 @@ namespace pcl
         }
     };
 
+    struct Cylinder
+    {
+        float coeff[7];
+    };
+    typedef struct Cylinder CylinderHypotheses;
+
     /** \brief @b SampleConsensusModel represents the base model class. All sample consensus models must inherit from 
       * this class.
       */
@@ -104,6 +110,8 @@ namespace pcl
         typedef boost::shared_ptr <const Coefficients> CoefficientsConstPtr;
 
         typedef typename Storage<float4>::type Hypotheses;
+
+        typedef typename Storage<CylinderHypotheses>::type HypothesesVector;
         //TODO: should be vector<int> instead of int. but currently, only 1point plane model supports this
         typedef typename Storage<int>::type Samples;
 
@@ -167,6 +175,10 @@ namespace pcl
         virtual bool 
         generateModelHypotheses (Hypotheses &h, Samples &s, int max_iterations) = 0;
 
+        bool 
+        generateModelHypothesesVector (HypothesesVector &hv, int max_iterations)
+          {return false;};
+
         virtual bool 
         isSampleInlier (IndicesPtr &inliers_stencil, Samples &samples, unsigned int &i)
           {return ((*inliers_stencil)[samples[i]] != -1);};
@@ -220,11 +232,21 @@ namespace pcl
                               IndicesPtr &inliers_stencil,
                               float3 &centroid) = 0;
 
+        int
+        selectWithinDistance (HypothesesVector &hv, int idx,
+                              float threshold,
+                              IndicesPtr &inliers_stencil)
+          {return 0;};
+
         virtual int
         countWithinDistance (const Coefficients &model_coefficients, float threshold) = 0;
 
         virtual int
         countWithinDistance (const Hypotheses &h, int idx, float threshold) = 0;
+
+        int
+        countWithinDistance (const HypothesesVector &hv, int idx, float threshold)
+          {return 0;};
 
         int
         deleteIndices (const IndicesPtr &indices_stencil );

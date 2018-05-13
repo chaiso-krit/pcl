@@ -27,9 +27,21 @@ if(build)
     PCL_CUDA_ADD_EXECUTABLE(kinect_ransac "${SUBSYS_NAME}" src/kinect_ransac.cpp)
     target_link_libraries (kinect_ransac pcl_io pcl_cuda_io pcl_visualization pcl_common pcl_kdtree pcl_cuda_segmentation pcl_cuda_sample_consensus)
 
+
+    #PCL_CUDA_ADD_EXECUTABLE(kinect_ransac_file "${SUBSYS_NAME}" src/kinect_ransac_file.cpp)
+    #target_link_libraries (kinect_ransac_file pcl_io pcl_cuda_io pcl_visualization pcl_common pcl_kdtree pcl_cuda_segmentation pcl_cuda_sample_consensus)
+
+    PCL_CUDA_ADD_EXECUTABLE(kinect_ransac_cylinder "${SUBSYS_NAME}" src/kinect_ransac_cylinder.cpp)
+    target_link_libraries (kinect_ransac_cylinder pcl_io pcl_cuda_io pcl_visualization pcl_common pcl_kdtree pcl_cuda_segmentation pcl_cuda_sample_consensus)
+
     find_package(OpenCV REQUIRED)
     PCL_CUDA_ADD_EXECUTABLE(kinect_segmentation_cuda "${SUBSYS_NAME}" src/kinect_segmentation_cuda.cpp)
     target_link_libraries (kinect_segmentation_cuda pcl_io pcl_cuda_io pcl_visualization pcl_common pcl_kdtree pcl_cuda_features pcl_cuda_segmentation pcl_cuda_sample_consensus ${OpenCV_LIBS})
+
+    #include_directories(${PCL_INCLUDE_DIRS})
+    #link_directories(${PCL_LIBRARY_DIRS})
+    #PCL_CUDA_ADD_EXECUTABLE(kinect_cylinder_detction "${SUBSYS_NAME}" src/kinect_cylinder_detection.cpp)
+    #target_link_libraries (kinect_cylinder_detection ${PCL_LIBRARIES})
 
   endif()
 endif(build)

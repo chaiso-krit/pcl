@@ -18,6 +18,9 @@ if (build)
         src/sac_model_1point_plane.cu
         src/ransac.cu
         src/multi_ransac.cu
+
+        src/ransac_cylinder.cu
+        src/sac_model_cylinder.cu
         )
 
     set(incs
@@ -27,6 +30,9 @@ if (build)
         include/pcl/cuda/sample_consensus/sac_model.h
         include/pcl/cuda/sample_consensus/sac_model_plane.h
         include/pcl/cuda/sample_consensus/sac_model_1point_plane.h
+
+        include/pcl/cuda/sample_consensus/ransac_cylinder.h
+        include/pcl/cuda/sample_consensus/sac_model_cylinder.h
         )
 
     set(LIB_NAME "pcl_${SUBSYS_NAME}")
