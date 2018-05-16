@@ -43,6 +43,8 @@
 #include <pcl/cuda/sample_consensus/sac_model.h>
 #include <thrust/random.h>
 
+#include <pcl/point_types.h>
+
 namespace pcl
 {
   namespace cuda
@@ -169,6 +171,14 @@ namespace pcl
       operator () (const Tuple &pt, const int &idx);
     };
 
+    struct ConvertCloudToNormal
+    {
+      __host__ __device__ float4
+      operator () (const PointXYZRGB &pt)
+      {
+        return make_float4 (pt.x, pt.y, pt.z, 0.0f);
+      }
+    };
     ////////////////////////////////////////////////////////////////////////////////////////////
     /** \brief @b SampleConsensusModelCylinder defines a model for 3D plane segmentation.
       */
@@ -211,6 +221,8 @@ namespace pcl
         void 
         getSamples (int &iterations, Indices &samples);
 
+        void
+        setNormalsVector (const PointCloudConstPtr &cloud_normal);
         /** \brief Check whether the given index samples can form a valid plane model, compute the model coefficients from
           * these samples and store them in model_coefficients. The plane coefficients are:
           * a, b, c, d (ax+by+cz+d=0)
@@ -251,10 +263,6 @@ namespace pcl
                               IndicesPtr &inliers_stencil,
                               float3 &centroid);
 
-        int
-        selectWithinDistance (const HypothesesVector &hv, int idx,
-                              float threshold,
-                              IndicesPtr &inliers, IndicesPtr &inliers_stencil);
         int
         selectWithinDistance (const HypothesesVector &hv, int idx,
                               float threshold,

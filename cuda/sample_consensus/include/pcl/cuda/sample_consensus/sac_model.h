@@ -175,9 +175,8 @@ namespace pcl
         virtual bool 
         generateModelHypotheses (Hypotheses &h, Samples &s, int max_iterations) = 0;
 
-        bool 
-        generateModelHypothesesVector (HypothesesVector &hv, int max_iterations)
-          {return false;};
+        virtual bool 
+        generateModelHypothesesVector (HypothesesVector &hv, int max_iterations) = 0;
 
         virtual bool 
         isSampleInlier (IndicesPtr &inliers_stencil, Samples &samples, unsigned int &i)
@@ -232,11 +231,10 @@ namespace pcl
                               IndicesPtr &inliers_stencil,
                               float3 &centroid) = 0;
 
-        int
-        selectWithinDistance (HypothesesVector &hv, int idx,
+        virtual int
+        selectWithinDistance (const HypothesesVector &hv, int idx,
                               float threshold,
-                              IndicesPtr &inliers_stencil)
-          {return 0;};
+                              IndicesPtr &inliers_stencil) = 0;
 
         virtual int
         countWithinDistance (const Coefficients &model_coefficients, float threshold) = 0;

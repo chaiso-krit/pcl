@@ -174,6 +174,7 @@ namespace pcl
 
         typedef typename SampleConsensusModel<Storage>::Coefficients Coefficients;
         typedef typename SampleConsensusModel<Storage>::Hypotheses Hypotheses;
+        typedef typename SampleConsensusModel<Storage>::HypothesesVector HypothesesVector;
         typedef typename SampleConsensusModel<Storage>::Samples Samples;
 
 
@@ -205,6 +206,9 @@ namespace pcl
         generateModelHypotheses (Hypotheses &h, int max_iterations);
 
         bool 
+        generateModelHypothesesVector (HypothesesVector &hv, int max_iterations) {return false;}
+
+        bool 
         generateModelHypotheses (Hypotheses &h, Samples &s, int max_iterations);
 
         /** \brief Select all the points which respect the given model coefficients as inliers.
@@ -227,6 +231,11 @@ namespace pcl
                               float threshold,
                               IndicesPtr &inliers_stencil,
                               float3 &centroid);
+        int
+        selectWithinDistance (const HypothesesVector &hv, int idx,
+                              float threshold,
+                              IndicesPtr &inliers_stencil) {return 0;}
+
         int
         countWithinDistance (const Coefficients &model_coefficients, float threshold);
 

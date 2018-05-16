@@ -221,9 +221,14 @@ namespace pcl
 
       float trand = nr_indices / (RAND_MAX + 1.0f);
       thrust::default_random_engine rng (t);
+      //return result;
 
       int sample_point1 = indices[(int)(rng () * trand)];
       int sample_point2 = indices[(int)(rng () * trand)];
+      
+      result.coeff[0] = sample_point1;
+      result.coeff[1] = sample_point2;
+      //return result;
 
       // check if data is valid to compute
       if (isnan (input[sample_point1].x) || isnan(input[sample_point2].x))
@@ -235,7 +240,7 @@ namespace pcl
       //if (fabs(input[sample_point1].x - input[sample_point2].x) <=  std::numeric_limits<float>::epsilon ())
       if (fabs(input[sample_point1].x - input[sample_point2].x) <= 0.0001 &&
           fabs(input[sample_point1].y - input[sample_point2].y) <= 0.0001 &&
-          fabs(input[sample_point1].y - input[sample_point2].y) <= 0.0001)
+          fabs(input[sample_point1].z - input[sample_point2].z) <= 0.0001)
       {
         return result;
       }
@@ -395,6 +400,7 @@ namespace pcl
       //thrust::counting_iterator<int> first (0);
       // Input: Point Cloud, Indices
       // Output: Hypotheses
+      std::cout << "Hi" << std::endl;
       transform (//first, first + max_iterations,
                  //index_sequence_begin, 
                  //index_sequence_begin + max_iterations, 
@@ -404,6 +410,7 @@ namespace pcl
                                                        thrust::raw_pointer_cast (&(*normals_)[0]),
                                                        thrust::raw_pointer_cast (&(*indices_)[0]),
                                                        indices_->size (), std::numeric_limits<float>::quiet_NaN ()));
+      std::cout << "Hi" << std::endl;
       
       return (true);
     }
@@ -1053,6 +1060,18 @@ namespace pcl
       return best_nr_inliers;
     }
 
+    template <template <typename> class Storage> void
+    SampleConsensusModelCylinder<Storage>::setNormalsVector (
+        const PointCloudConstPtr &cloud_normal)
+    {
+      using namespace thrust;
+      boost::shared_ptr<typename Storage<float4>::type> normals (new typename Storage<float4>::type);
+      normals->resize (cloud_normal->points.size());
+      thrust::transform (cloud_normal->points.begin (), cloud_normal->points.end (),
+          normals->begin(),
+          ConvertCloudToNormal() );
+      this->setNormals(normals);
+    }
 
     // explicit template instantiation for device and host
     template class PCL_EXPORTS SampleConsensusModelCylinder<Device>;

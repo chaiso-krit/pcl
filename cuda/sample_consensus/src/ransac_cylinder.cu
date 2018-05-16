@@ -75,6 +75,7 @@ namespace pcl
 #if 1
       HypothesesVector h;
       sac_model_->generateModelHypothesesVector (h, max_iterations_);
+      printf("Generate Hypo Pass\n");
 #endif
       // Iterate
       while (iterations_ < k)
@@ -101,6 +102,8 @@ namespace pcl
 #endif
 
 #if 1
+        CylinderHypotheses ch = h[iterations_];
+        printf("iter %d: %f %f %f\n", iterations_, ch.coeff[0], ch.coeff[1], ch.coeff[1]);
         n_inliers_count = sac_model_->selectWithinDistance (h, iterations_, threshold_, inl_stencil);
         //n_inliers_count = sac_model_->countWithinDistance (h, iterations_, threshold_);
 #endif

@@ -52,20 +52,40 @@
 #include <pcl/cuda/sample_consensus/sac_model_cylinder.h>
 #include <pcl/cuda/sample_consensus/ransac_cylinder.h>
 
+#include <pcl/cuda/features/normal_3d.h>
+
 using namespace pcl::cuda;
+
+//typedef pcl::PointXYZRGB PointT;
+typedef pcl::PointNormal PointT;
 
 class SimpleKinectTool
 {
   public:
     SimpleKinectTool () : viewer ("KinectGrabber"), go_on(true) {}
 
+    template <template <typename> class Storage>
+      boost::shared_ptr<typename Storage<float4>::type> createNormals (size_t size_data)
+    {
+      boost::shared_ptr<typename Storage<float4>::type> normals (new typename Storage<float4>::type);
+      normals->resize (size_data);
+      return normals;
+    }
+
+
     template <template <typename> class Storage> void 
-    file_cloud_cb (const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& cloud) 
+    file_cloud_cb (const pcl::PointCloud<PointT>::ConstPtr& cloud) 
     {
       ScopeTimeCPU ttt ("all");
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr output (new pcl::PointCloud<pcl::PointXYZRGB>);
       PointCloudAOS<Host> data_host;
+     // boost::shared_ptr<typename Storage<float4>::type> normals (new typename Storage<float4>::type);
+
       data_host.points.resize (cloud->points.size());
+      //boost::shared_ptr<typename Storage<float4>::type> normals (new typename Storage<float4>::type);
+
+      //normals->resize (50000);
+
       for (size_t i = 0; i < cloud->points.size (); ++i)
       {
         PointXYZRGB pt;
@@ -73,7 +93,7 @@ class SimpleKinectTool
         pt.y = cloud->points[i].y;
         pt.z = cloud->points[i].z;
         // Pack RGB into a float
-        pt.rgb = *(float*)(&cloud->points[i].rgb);
+        //pt.rgb = *(float*)(&cloud->points[i].rgb);
         data_host.points[i] = pt;
       }
       data_host.width = cloud->width;
@@ -81,13 +101,18 @@ class SimpleKinectTool
       data_host.is_dense = cloud->is_dense;
       typename PointCloudAOS<Storage>::Ptr data = toStorage<Host, Storage> (data_host);
 
+      //boost::shared_ptr<typename Storage<float4>::type> normals;
+      //typename Storage<float4>::type normals (new typename Storage<float4>::type);
+      //normals = extractNormals<Storage> (cloud);
+
       typename SampleConsensusModelCylinder<Storage>::Ptr sac_model (new SampleConsensusModelCylinder<Storage> (data));
+      sac_model->setNormalsVector (data);
       RandomSampleConsensusCylinder<Storage> sac (sac_model);
-      sac.setMaxIterations (40000);
+      sac.setMaxIterations (2);
       sac.setDistanceThreshold (1.5);
 
       {
-        for(int i=0; i<2; ++i)
+        for(int i=0; i<1; ++i)
         {
           ScopeTimeCPU timer ("computeModel: ");
           if (!sac.computeModel (0))
@@ -101,8 +126,10 @@ class SimpleKinectTool
 
             OpenNIRGB color;
             color.r = 255; color.g = 255; color.b = 0;
+            printf("Before Color\n");
             //std::cerr << data->points.size() << " =?= " << inliers_stencil->size () << std::endl;
-            colorIndices<Storage> (data, inliers_stencil, color);
+            //colorIndices<Storage> (data, inliers_stencil, color);
+            printf("After Color\n");
           }
         }
       }
@@ -119,7 +146,7 @@ class SimpleKinectTool
               const boost::shared_ptr<openni_wrapper::DepthImage>& depth_image, 
               float constant)
     {
-      pcl::PointCloud<pcl::PointXYZRGB>::Ptr output (new pcl::PointCloud<pcl::PointXYZRGB>);
+      pcl::PointCloud<PointT>::Ptr output (new pcl::PointCloud<PointT>);
       typename PointCloudAOS<Storage>::Ptr data;
       {
       ScopeTimeCPU timer ("All: ");
@@ -163,12 +190,12 @@ class SimpleKinectTool
       bool repeat = false;
 
       std::string path = pcd_filename;
-      filegrabber = new pcl::PCDGrabber<pcl::PointXYZRGB > (path, frames_per_second, repeat);
+      filegrabber = new pcl::PCDGrabber<PointT> (path, frames_per_second, repeat);
       
       if (use_device)
       {
         std::cerr << "[RANSAC] Using GPU..." << std::endl;
-        boost::function<void (const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr&)> f = boost::bind (&SimpleKinectTool::file_cloud_cb<Device>, this, _1);
+        boost::function<void (const pcl::PointCloud<PointT>::ConstPtr&)> f = boost::bind (&SimpleKinectTool::file_cloud_cb<Device>, this, _1);
         filegrabber->registerCallback (f);
       }
       else
